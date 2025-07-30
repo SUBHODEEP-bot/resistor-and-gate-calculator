@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resistor Color Code Calculator</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --text: #ecf0f1;
+            --highlight: #e74c3c;
+            --card-bg: #ffffff;
+            --card-text: #2c3e50;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            line-height: 1.5;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            color: var(--card-text);
+        }
+        
+        header {
+            background-color: var(--accent);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .calculator-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .calculator-content {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                padding: 1rem;
+            }
+        }
+        
+        .resistor-display {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .resistor-value-display {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        
+        #display-value {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        
+        .resistor-svg-wrap {
+            margin: 0.5rem 0;
+        }
+        
+        #resistor-svg {
+            width: 100%;
+            height: auto;
+            max-width: 300px;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        .form-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: var(--secondary);
+        }
+        
+        .form-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        label {
+            flex: 0 0 80px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--secondary);
+        }
+        
+        select, input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+        
+        .btn-green {
+            background-color: #27ae60;
+        }
+        
+        .color-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .color-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: var(--secondary);
+        }
+        
+        .color-table {
+            width: 100%;
+            font-size: 0.8rem;
+            border-collapse: collapse;
+        }
+        
+        .color-table th, .color-table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .color-chip {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 0.75rem;
+            font-size: 0.7rem;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Resistor Color Code Calculator</h1>
+        </header>
+        
+        <div class="calculator-content">
+            <div class="resistor-display">
+                <div class="resistor-value-display">
+                    <span id="display-value">0 Ω ±1%</span>
+                </div>
+                
+                <div class="resistor-svg-wrap">
+                    <svg id="resistor-svg" width="300" height="80" viewBox="0 0 300 80">
+                        <!-- Wires -->
+                        <rect x="0" y="36" width="40" height="8" fill="#bbb" />
+                        <rect x="260" y="36" width="40" height="8" fill="#bbb" />
+                        <!-- Body -->
+                        <rect x="40" y="20" width="220" height="40" rx="15" fill="#d2a06e" stroke="#b88b4a" stroke-width="2" />
+                        <!-- Bands (dynamic) -->
+                        <rect id="band1" x="80" y="20" width="12" height="40" rx="4" fill="#000" />
+                        <rect id="band2" x="110" y="20" width="12" height="40" rx="4" fill="#964B00" />
+                        <rect id="band3" x="160" y="20" width="12" height="40" rx="4" fill="#FFD700" />
+                        <rect id="band4" x="210" y="20" width="12" height="40" rx="4" fill="#C0C0C0" />
+                    </svg>
+                </div>
+                
+                <div class="color-info">
+                    <h3>Color Code Reference</h3>
+                    <table class="color-table">
+                        <thead>
+                            <tr>
+                                <th>Color</th>
+                                <th>Digit</th>
+                                <th>Multiplier</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="color-chip" style="background-color: #000;"></span> Black</td>
+                                <td>0</td>
+                                <td>10<sup>0</sup></td>
+                            </tr>
+                            <tr>
+                                <td><span class="color-chip" style="background-color: #964B00;"></span> Brown</td>
+                                <td>1</td>
+                                <td>10<sup>1</sup></td>
+                            </tr>
+                            <tr>
+                                <td><span class="color-chip" style="background-color: #f00;"></span> Red</td>
+                                <td>2</td>
+                                <td>10<sup>2</sup></td>
+                            </tr>
+                            <tr>
+                                <td><span class="color-chip" style="background-color: #ffa500;"></span> Orange</td>
+                                <td>3</td>
+                                <td>10<sup>3</sup></td>
+                            </tr>
+                            <tr>
+                                <td><span class="color-chip" style="background-color: #ff0;"></span> Yellow</td>
+                                <td>4</td>
+                                <td>10<sup>4</sup></td>
+                            </tr>
+                            <tr>
+                                <td><span class="color-chip" style="background-color: #008000;"></span> Green</td>
+                                <td>5</td>
+                                <td>10<sup>5</sup></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="form-container">
+                <form id="resistor-form">
+                    <div class="form-group">
+                        <h3>Band Selection</h3>
+                        <div class="form-row">
+                            <label for="color1">1st Digit:</label>
+                            <select id="color1" name="color1">
+                                <option value="black">Black (0)</option>
+                                <option value="brown">Brown (1)</option>
+                                <option value="red">Red (2)</option>
+                                <option value="orange">Orange (3)</option>
+                                <option value="yellow">Yellow (4)</option>
+                                <option value="green">Green (5)</option>
+                                <option value="blue">Blue (6)</option>
+                                <option value="violet">Violet (7)</option>
+                                <option value="gray">Gray (8)</option>
+                                <option value="white">White (9)</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label for="color2">2nd Digit:</label>
+                            <select id="color2" name="color2">
+                                <option value="black">Black (0)</option>
+                                <option value="brown">Brown (1)</option>
+                                <option value="red">Red (2)</option>
+                                <option value="orange">Orange (3)</option>
+                                <option value="yellow">Yellow (4)</option>
+                                <option value="green" selected>Green (5)</option>
+                                <option value="blue">Blue (6)</option>
+                                <option value="violet">Violet (7)</option>
+                                <option value="gray">Gray (8)</option>
+                                <option value="white">White (9)</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label for="multiplier">Multiplier:</label>
+                            <select id="multiplier" name="multiplier">
+                                <option value="black">Black (10<sup>0</sup>)</option>
+                                <option value="brown">Brown (10<sup>1</sup>)</option>
+                                <option value="red">Red (10<sup>2</sup>)</option>
+                                <option value="orange">Orange (10<sup>3</sup>)</option>
+                                <option value="yellow">Yellow (10<sup>4</sup>)</option>
+                                <option value="green">Green (10<sup>5</sup>)</option>
+                                <option value="blue">Blue (10<sup>6</sup>)</option>
+                                <option value="violet">Violet (10<sup>7</sup>)</option>
+                                <option value="gray">Gray (10<sup>8</sup>)</option>
+                                <option value="white">White (10<sup>9</sup>)</option>
+                                <option value="gold">Gold (10<sup>-1</sup>)</option>
+                                <option value="silver">Silver (10<sup>-2</sup>)</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label for="tolerance">Tolerance:</label>
+                            <select id="tolerance" name="tolerance">
+                                <option value="brown">Brown (±1%)</option>
+                                <option value="red">Red (±2%)</option>
+                                <option value="green">Green (±0.5%)</option>
+                                <option value="blue">Blue (±0.25%)</option>
+                                <option value="violet">Violet (±0.1%)</option>
+                                <option value="gray">Gray (±0.05%)</option>
+                                <option value="gold">Gold (±5%)</option>
+                                <option value="silver">Silver (±10%)</option>
+                            </select>
+                        
+                        
+                        </div>
+                            <div class="band-selection" style="margin-bottom: 2cm;"
+  <!-- Your band selection fields here -->
+</div>
+
+<div class="value-selection">
+  
+  <!-- Your value input fields here -->
+</div>
+
+                       
+                    </div>
+                </form>
+                
+                <div class="form-group">
+                    <h3>Value to Color Code</h3>
+                    <div class="form-row">
+                        <label for="resistance-value">Resistance (Ω):</label>
+                        <input type="text" id="resistance-value" placeholder="e.g. 4700">
+                    </div>
+                    <div class="form-row">
+                        <label for="resistance-tolerance">Tolerance:</label>
+                        <select id="resistance-tolerance">
+                            <option value="brown">±1%</option>
+                            <option value="red">±2%</option>
+                            <option value="green">±0.5%</option>
+                            <option value="blue">±0.25%</option>
+                            <option value="violet">±0.1%</option>
+                            <option value="gray">±0.05%</option>
+                            <option value="gold">±5%</option>
+                            <option value="silver">±10%</option>
+                        </select>
+                    </div>
+                    <button id="find-colors-btn" class="btn btn-green">Find Color Code</button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            &copy; Resistor Color Code Calculator by subhodeep pal.
+        </footer>
+    </div>
+    
+    <script>
+        // Color hex codes for SVG bands
+        const colorHex = {
+            black: '#000', brown: '#964B00', red: '#f00', orange: '#ffa500', yellow: '#ff0',
+            green: '#008000', blue: '#00f', violet: '#8b00ff', gray: '#888', white: '#fff',
+            gold: '#ffd700', silver: '#c0c0c0'
+        };
+        
+        const toleranceMap = {
+            brown: '±1%', red: '±2%', green: '±0.5%', blue: '±0.25%', 
+            violet: '±0.1%', gray: '±0.05%', gold: '±5%', silver: '±10%'
+        };
+        
+        const digitMap = {
+            black: 0, brown: 1, red: 2, orange: 3, yellow: 4,
+            green: 5, blue: 6, violet: 7, gray: 8, white: 9
+        };
+        
+        const multiplierMap = {
+            black: 1, brown: 10, red: 100, orange: 1000, yellow: 10000,
+            green: 100000, blue: 1000000, violet: 10000000, gray: 100000000, white: 1000000000,
+            gold: 0.1, silver: 0.01
+        };
+        
+        // Initialize with default values
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBands();
+            calculateValue();
+        });
+        
+        function updateBands() {
+            document.getElementById('band1').setAttribute('fill', colorHex[document.getElementById('color1').value]);
+            document.getElementById('band2').setAttribute('fill', colorHex[document.getElementById('color2').value]);
+            document.getElementById('band3').setAttribute('fill', colorHex[document.getElementById('multiplier').value]);
+            document.getElementById('band4').setAttribute('fill', colorHex[document.getElementById('tolerance').value]);
+        }
+        
+        function updateDisplay(value, tol) {
+            let displayValue = value;
+            if (value >= 1000 && value < 1000000) {
+                displayValue = (value / 1000).toFixed(2) + 'K';
+            } else if (value >= 1000000) {
+                displayValue = (value / 1000000).toFixed(2) + 'M';
+            }
+            document.getElementById('display-value').textContent = displayValue + ' Ω ' + tol;
+        }
+        
+        function calculateValue() {
+            const color1 = document.getElementById('color1').value;
+            const color2 = document.getElementById('color2').value;
+            const multiplier = document.getElementById('multiplier').value;
+            const tolerance = document.getElementById('tolerance').value;
+            
+            const digit1 = digitMap[color1] || 0;
+            const digit2 = digitMap[color2] || 0;
+            const multiplierValue = multiplierMap[multiplier] || 1;
+            
+            const value = (digit1 * 10 + digit2) * multiplierValue;
+            updateDisplay(value, toleranceMap[tolerance]);
+        }
+        
+        // Event listeners for band selection changes
+        document.getElementById('color1').addEventListener('change', function() {
+            updateBands();
+            calculateValue();
+        });
+        
+        document.getElementById('color2').addEventListener('change', function() {
+            updateBands();
+            calculateValue();
+        });
+        
+        document.getElementById('multiplier').addEventListener('change', function() {
+            updateBands();
+            calculateValue();
+        });
+        
+        document.getElementById('tolerance').addEventListener('change', function() {
+            updateBands();
+            calculateValue();
+        });
+        
+        // Form submission
+        document.getElementById('resistor-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            calculateValue();
+        });
+        
+        // Find colors from value
+        document.getElementById('find-colors-btn').addEventListener('click', function() {
+            const resistance = parseFloat(document.getElementById('resistance-value').value);
+            const tolerance = document.getElementById('resistance-tolerance').value;
+            
+            if (isNaN(resistance)) {
+                alert('Please enter a valid resistance value');
+                return;
+            }
+            
+            findColorCode(resistance, tolerance);
+        });
+        
+        function findColorCode(resistance, tolerance) {
+            let ohms = resistance;
+            let multiplier = 0;
+            
+            // Normalize the value to two significant digits
+            while (ohms >= 100) {
+                ohms /= 10;
+                multiplier++;
+            }
+            
+            while (ohms < 10 && ohms > 0) {
+                ohms *= 10;
+                multiplier--;
+            }
+            
+            ohms = Math.round(ohms);
+            
+            const digit1 = Math.floor(ohms / 10);
+            const digit2 = ohms % 10;
+            
+            // Find colors for digits
+            const color1 = Object.keys(digitMap).find(key => digitMap[key] === digit1) || 'black';
+            const color2 = Object.keys(digitMap).find(key => digitMap[key] === digit2) || 'black';
+            
+            // Find multiplier color
+            let multiplierColor = 'black';
+            if (multiplier >= 0 && multiplier <= 9) {
+                multiplierColor = Object.keys(multiplierMap).find(key => multiplierMap[key] === Math.pow(10, multiplier)) || 'black';
+            } else if (multiplier === -1) {
+                multiplierColor = 'gold';
+            } else if (multiplier === -2) {
+                multiplierColor = 'silver';
+            }
+            
+            // Set the values
+            document.getElementById('color1').value = color1;
+            document.getElementById('color2').value = color2;
+            document.getElementById('multiplier').value = multiplierColor;
+            document.getElementById('tolerance').value = tolerance;
+            
+            // Update display
+            updateBands();
+            calculateValue();
+        }
+    </script>
+</body>
+
+<!-- Add this right before </body> -->
+<div class="gate-calculator" style="
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    background: rgb(255, 255, 255);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    z-index: 1000;
+">
+    <h3 style="margin-top: 0; color: #2c3e50; border-bottom: 1px solid #000000; padding-bottom: 8px;">
+        Logic Gate Calculator
+    </h3>
+    
+    <div style="margin-bottom: 10px;">
+        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Select Gate:</label>
+        <select id="gate-type" style="width: 100%; padding: 6px; border: 1px solid #e01818; border-radius: 4px;">
+            <option value="AND">AND</option>
+            <option value="OR">OR</option>
+            <option value="NOT">NOT</option>
+            <option value="NAND">NAND</option>
+            <option value="NOR">NOR</option>
+            <option value="XOR">XOR</option>
+        </select>
+    </div>
+    
+    <div id="input-container" style="margin-bottom: 10px;">
+        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+            <input type="checkbox" id="input-1" style="margin-right: 8px;">
+            <label for="input-1">Input 1</label>
+        </div>
+        <div style="display: flex; align-items: center;">
+            <input type="checkbox" id="input-2" style="margin-right: 8px;">
+            <label for="input-2">Input 2</label>
+        </div>
+    </div>
+    
+    <button id="calculate-gate" style="
+        background: #e74c3c;
+        color: rgb(0, 0, 0);
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        margin-bottom: 10px;
+        
+        
+    ">Calculate</button>
+    
+    <div style="background: #9d9def; padding: 10px; border-radius: 4px;">
+        <strong>Output:</strong> <span id="gate-output">-</span>
+    </div>
+</div>
+
+<script>
+    // Logic Gate Calculator
+    document.addEventListener('DOMContentLoaded', function() {
+        const gateTypeSelect = document.getElementById('gate-type');
+        const calculateBtn = document.getElementById('calculate-gate');
+        const outputElement = document.getElementById('gate-output');
+        
+        calculateBtn.addEventListener('click', function() {
+            const gateType = gateTypeSelect.value;
+            const inputs = [];
+            
+            // Get all checkbox values
+            const checkboxes = document.querySelectorAll('#input-container input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                inputs.push(checkbox.checked);
+            });
+            
+            // Calculate based on gate type
+            let result;
+            switch(gateType) {
+                case 'AND':
+                    result = inputs.every(Boolean);
+                    break;
+                case 'OR':
+                    result = inputs.some(Boolean);
+                    break;
+                case 'NOT':
+                    if (inputs.length !== 1) {
+                        alert('NOT gate requires exactly one input');
+                        return;
+                    }
+                    result = !inputs[0];
+                    break;
+                case 'NAND':
+                    result = !inputs.every(Boolean);
+                    break;
+                case 'NOR':
+                    result = !inputs.some(Boolean);
+                    break;
+                case 'XOR':
+                    result = inputs.filter(Boolean).length % 2 === 1;
+                    break;
+                default:
+                    result = false;
+            }
+            
+            outputElement.textContent = result ? '1 (True)' : '0 (False)';
+        });
+        
+        // Add more inputs if needed
+        gateTypeSelect.addEventListener('change', function() {
+            const container = document.getElementById('input-container');
+            if (this.value === 'NOT' && container.children.length > 1) {
+                while (container.children.length > 1) {
+                    container.removeChild(container.lastChild);
+                }
+            }
+        });
+    });
+</script>
+
+
+</html>
+
+
