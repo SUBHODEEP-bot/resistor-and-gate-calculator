@@ -47,6 +47,5 @@ def calculate():
         value = result
     return jsonify({'value': value})
 
-if __name__ == '__main__':
-
-    app.run(debug=True, port=5050)
+if __name__ == "__main__":
+    app.run()
