@@ -1,3 +1,5 @@
+from utils.resistor_calculator import calculate_resistor_value
+from utils.gate_calculator import calculate_logic_gate
 
 from flask import Flask, render_template, request, jsonify
 from utils.resistor_calculator import calculate_resistor_value
