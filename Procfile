@@ -1,1 +1,2 @@
-web: gunicorn src.app:app
+web: gunicorn resistor-calculator-app.src.app:app
+

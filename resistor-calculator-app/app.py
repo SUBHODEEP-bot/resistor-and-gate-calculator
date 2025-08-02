@@ -1,12 +1,7 @@
-from utils.resistor_calculator import calculate_resistor_value
-from utils.gate_calculator import calculate_logic_gate
-
 from flask import Flask, render_template, request, jsonify
 from utils.resistor_calculator import calculate_resistor_value
 from utils.gate_calculator import calculate_logic_gate
-
-
-
+import os
 
 app = Flask(__name__)
 
@@ -23,13 +18,12 @@ MULTIPLIERS = {
 def index():
     return render_template('index.html')
 
-
 @app.route('/gates', methods=['POST'])
 def gates():
-    data=request.get_json()
-    input1=data['input1']
-    input2=data['input2']
-    gate_type=data['gate_type']
+    data = request.get_json()
+    input1 = data['input1']
+    input2 = data['input2']
+    gate_type = data['gate_type']
     result = calculate_logic_gate(gate_type, input1, input2)
     return render_template('gates.html', result=result)
 
@@ -40,16 +34,12 @@ def calculate():
     band2 = data['color2']
     multiplier = data['multiplier']
     tolerance = data.get('tolerance', 'brown')
-    # Use the utility function for calculation and formatting
     result = calculate_resistor_value(band1, band2, multiplier, tolerance)
-    # Extract resistance value for display (for SVG and JS)
     if result.startswith('Resistance:'):
-        value = result.split(',')[0].replace('Resistance:','').strip().replace(' Ohms','')
+        value = result.split(',')[0].replace('Resistance:', '').strip().replace(' Ohms', '')
     else:
         value = result
     return jsonify({'value': value})
-
-import os
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5050))
